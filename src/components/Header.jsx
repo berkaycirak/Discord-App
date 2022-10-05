@@ -1,5 +1,6 @@
 import React from 'react';
 import { BiMenuAltRight as MenuIcon } from 'react-icons/bi';
+import { app, db, provider, auth } from '../firebase';
 
 function Header() {
 	return (

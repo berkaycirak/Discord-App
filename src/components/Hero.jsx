@@ -1,5 +1,7 @@
 import React from 'react';
 import { BsApple } from 'react-icons/bs';
+import Img1 from '../assets/img1.svg';
+import Img2 from '../assets/img2.svg';
 
 function Hero() {
 	return (
@@ -24,6 +26,18 @@ function Hero() {
 							<h1>Open Discord in your browser</h1>
 						</button>
 					</div>
+				</div>
+				<div className='flex-grow '>
+					<img
+						src={Img1}
+						alt=''
+						className='absolute -left-36 mt-16 sm:-left-44 md:hidden'
+					/>
+					<img
+						src={Img2}
+						alt=''
+						className='hidden md:inline absolute'
+					/>
 				</div>
 			</div>
 		</div>
