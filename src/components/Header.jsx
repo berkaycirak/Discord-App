@@ -1,8 +1,23 @@
 import React from 'react';
 import { BiMenuAltRight as MenuIcon } from 'react-icons/bi';
-import { app, db, provider, auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { auth, provider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { useUserInfo, setUser } from '../storage/user/userSlice';
 
 function Header() {
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const user = useUserInfo();
+	console.log(user);
+
+	// Custom login function
+	const handleLoginGoogle = async () => {
+		const connectData = await signInWithPopup(auth, provider);
+		dispatch(setUser(connectData.user));
+	};
+
 	return (
 		<header className='flex items-center justify-between py-4 px-6 bg-discord_blue  '>
 			<a href='/'>
@@ -30,7 +45,9 @@ function Header() {
 				</a>
 			</div>
 			<div className='flex space-x-4 items-center'>
-				<button className='bg-white rounded-full p-2 text-xs md:text-sm px-4 focus:outline-none font-medium hover:shadow-2xl hover:text-discord_blurple transition duration-200'>
+				<button
+					onClick={() => handleLoginGoogle()}
+					className='bg-white rounded-full p-2 text-xs md:text-sm px-4 focus:outline-none font-medium hover:shadow-2xl hover:text-discord_blurple transition duration-200'>
 					Login
 				</button>
 				<MenuIcon
