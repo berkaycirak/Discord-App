@@ -10,12 +10,13 @@ function Header() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const user = useUserInfo();
-	console.log(user);
 
 	// Custom login function
-	const handleLoginGoogle = async () => {
+	const handleLoginGoogle = async (e) => {
+		e.preventDefault();
 		const connectData = await signInWithPopup(auth, provider);
 		dispatch(setUser(connectData.user));
+		navigate('/channels');
 	};
 
 	return (
@@ -46,9 +47,13 @@ function Header() {
 			</div>
 			<div className='flex space-x-4 items-center'>
 				<button
-					onClick={() => handleLoginGoogle()}
+					onClick={
+						!user.accessToken
+							? handleLoginGoogle
+							: () => navigate('/channels')
+					}
 					className='bg-white rounded-full p-2 text-xs md:text-sm px-4 focus:outline-none font-medium hover:shadow-2xl hover:text-discord_blurple transition duration-200'>
-					Login
+					{!user.accessToken ? 'Login' : 'Open Discord'}
 				</button>
 				<MenuIcon
 					size={28}

@@ -30,4 +30,5 @@ export const store = configureStore({
 	preloadedState: loadFromLocalStorage(),
 });
 
+// store is mutable object. Therefore, that will change the value on the reference.
 store.subscribe(() => saveToLocalStorage(store.getState()));
