@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './user/userSlice';
+import channelReducer from './channels/channelSlice';
 
 // To persist in refreshing. Since refreshing causes data lost, we should store that data in localStorage.
 function saveToLocalStorage(state) {
@@ -26,6 +27,7 @@ function loadFromLocalStorage() {
 export const store = configureStore({
 	reducer: {
 		user: userReducer,
+		channel: channelReducer,
 	},
 	preloadedState: loadFromLocalStorage(),
 });

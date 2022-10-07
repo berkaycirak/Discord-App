@@ -3,40 +3,52 @@ import { useUserInfo } from '../storage/user/userSlice';
 import discordLogo from '../assets/discord-logo.svg';
 import ServerIcon from './ServerIcon';
 import hotChili from '../assets/hot-chili.svg';
+import { uuidv4 } from '@firebase/util';
 import { AiOutlinePlus, AiOutlineDown } from 'react-icons/ai';
 import Channel from './Channel';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useEffect, useState } from 'react';
 
 function Home() {
-	const [channels, setChannels] = useState([]);
-	const [value, setValue] = useState(0);
+	console.log('I am rendering');
 	const user = useUserInfo();
+	const [channels, setChannels] = useState([]);
+
 	// Create collection if there is no, otherwise add document into the collection with given data.
 	const handleAdd = async () => {
 		const channelName = prompt('Enter your channelName');
 		if (channelName) {
 			const docRef = await addDoc(collection(db, 'channels'), {
 				channelName,
+				id: uuidv4(),
 			});
 			console.log('Document written with ID: ', docRef.id);
-			setValue(value + 1);
 		}
 	};
 
+	// onSnapshot is an eventlistener for cloud firestore. It fires callback when collection is changed. At the end of useEffect, we should remove that eventListener, otherwise we have a bad optimization.
+	// Do not forget, there is a new reference of newChannels array in each time, channels are not same even if their value looks like same. They will have a different address on RAM.
 	useEffect(() => {
-		const fetchChannels = async () => {
-			const querySnapshot = await getDocs(collection(db, 'channels'));
-			let channelsArray = [];
-			querySnapshot.forEach((doc) => {
-				channelsArray.push(doc.data());
-			});
-			setChannels(channelsArray);
+		const unsub = onSnapshot(
+			collection(db, 'channels'),
+			(snapshot) => {
+				let newChannels = [];
+				snapshot.docs.forEach((doc) => {
+					const { channelName, id } = doc.data();
+					newChannels.push({
+						channelName,
+						id,
+					});
+				});
+				setChannels(newChannels);
+			}
+		);
+		return () => {
+			unsub();
 		};
-		fetchChannels();
-	}, [value]);
-	console.log(channels);
+	}, []);
+
 	return (
 		<>
 			{!user.accessToken && <Navigate to='/' />}
@@ -73,11 +85,11 @@ function Home() {
 						</div>
 						<div className='flex flex-col space-y-2 px-2 mb-4'>
 							{/* index is not proper way, you should use unique id for key prop. */}
-							{channels.map((channel, index) => (
+							{channels.map((channel) => (
 								<Channel
-									key={index}
-									name={channel?.channelName}
-									className='mb-14'
+									key={channel.id}
+									name={channel.channelName}
+									id={channel.id}
 								/>
 							))}
 						</div>
