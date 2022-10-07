@@ -10,4 +10,8 @@
 	.server-default {
 		@apply cursor-pointer h-12 bg-[#36393f] rounded-full flex justify-center items-center hover:rounded-2xl transition-all duration-100 ease-out;
 	}
+
+	.icon {
+		@apply cursor-pointer text-white h-6 hover:text-[#dcddde];
+	}
 }

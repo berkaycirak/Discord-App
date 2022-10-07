@@ -2,12 +2,17 @@ import { Navigate } from 'react-router-dom';
 import { setUser, useUserInfo } from '../storage/user/userSlice';
 import discordLogo from '../assets/discord-logo.svg';
 import ServerIcon from './ServerIcon';
-import hotChili from '../assets/hot-chili.svg';
 import { uuidv4 } from '@firebase/util';
+import hotChili from '../assets/hot-chili.svg';
 import { AiOutlinePlus, AiOutlineDown } from 'react-icons/ai';
 import { BiCog, BiMicrophone, BiPhone } from 'react-icons/bi';
 import Channel from './Channel';
-import { collection, addDoc, onSnapshot } from 'firebase/firestore';
+import {
+	collection,
+	onSnapshot,
+	setDoc,
+	doc,
+} from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -22,12 +27,17 @@ function Home() {
 	// Create collection if there is no, otherwise add document into the collection with given data.
 	const handleAdd = async () => {
 		const channelName = prompt('Enter your channelName');
-		if (channelName) {
-			const docRef = await addDoc(collection(db, 'channels'), {
+		if (
+			channels.filter(
+				(channel) => channel.channelName === channelName
+			).length > 0
+		) {
+			alert('That channel is already exist.');
+		} else {
+			await setDoc(doc(db, 'channels', channelName), {
 				channelName,
 				id: uuidv4(),
 			});
-			console.log('Document written with ID: ', docRef.id);
 		}
 	};
 
@@ -45,10 +55,10 @@ function Home() {
 			(snapshot) => {
 				let newChannels = [];
 				snapshot.docs.forEach((doc) => {
-					const { channelName, id } = doc.data();
+					const { channelName } = doc.data();
 					newChannels.push({
 						channelName,
-						id,
+						id: doc.id,
 					});
 				});
 				setChannels(newChannels);
@@ -104,7 +114,7 @@ function Home() {
 							))}
 						</div>
 					</div>
-					<div className='flex justify-between items-center p-1 space-x-8 bg-black/25'>
+					<div className='flex justify-between items-center p-1 space-x-8 bg-[#292b2f]'>
 						<div className='flex items-center space-x-1 '>
 							<img
 								src={user?.photoURL}
@@ -115,7 +125,7 @@ function Home() {
 							<h4 className='text-white text-xs font-medium'>
 								{user?.displayName}
 								<span className='block text-gray-400'>
-									#{user.accessToken.substring(0, 4)}
+									#{user?.accessToken?.substring(0, 4)}
 								</span>
 							</h4>
 						</div>
@@ -132,7 +142,9 @@ function Home() {
 						</div>
 					</div>
 				</div>
-				<Outlet />
+				<div className='bg-[#36393f] flex-grow overflow-x-hidden'>
+					<Outlet />
+				</div>
 			</div>
 		</>
 	);
