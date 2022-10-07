@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useUserInfo } from '../storage/user/userSlice';
+import { setUser, useUserInfo } from '../storage/user/userSlice';
 import discordLogo from '../assets/discord-logo.svg';
 import ServerIcon from './ServerIcon';
 import hotChili from '../assets/hot-chili.svg';
@@ -7,13 +7,16 @@ import { uuidv4 } from '@firebase/util';
 import { AiOutlinePlus, AiOutlineDown } from 'react-icons/ai';
 import Channel from './Channel';
 import { collection, addDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
+import { useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 
 function Home() {
 	console.log('I am rendering');
 	const user = useUserInfo();
 	const [channels, setChannels] = useState([]);
+	const dispatch = useDispatch();
 
 	// Create collection if there is no, otherwise add document into the collection with given data.
 	const handleAdd = async () => {
@@ -25,6 +28,12 @@ function Home() {
 			});
 			console.log('Document written with ID: ', docRef.id);
 		}
+	};
+
+	// Handle signOut, I am not sure about the dispatch part, should I do like that for reset.
+	const signOut = async () => {
+		await auth.signOut();
+		dispatch(setUser({}));
 	};
 
 	// onSnapshot is an eventlistener for cloud firestore. It fires callback when collection is changed. At the end of useEffect, we should remove that eventListener, otherwise we have a bad optimization.
@@ -94,7 +103,18 @@ function Home() {
 							))}
 						</div>
 					</div>
+					<div>
+						<div>
+							<img
+								src={user?.photoURL}
+								alt=''
+								className='h-10 rounded-full cursor-pointer'
+								onClick={signOut}
+							/>
+						</div>
+					</div>
 				</div>
+				<Outlet />
 			</div>
 		</>
 	);

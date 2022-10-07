@@ -21,10 +21,12 @@ const router = createBrowserRouter([
 	{
 		path: '/channels',
 		element: <Home />,
-	},
-	{
-		path: '/channels/:id',
-		element: <Home />,
+		children: [
+			{
+				path: '/channels/:id',
+				element: <h1>Hello</h1>,
+			},
+		],
 	},
 ]);
 function App() {
