@@ -6,6 +6,7 @@ import {
 	RouterProvider,
 } from 'react-router-dom';
 import Home from './components/Home';
+import Chat from './components/Chat';
 //That is the newest version of react-router, you should build structure like below.
 const router = createBrowserRouter([
 	{
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
 		children: [
 			{
 				path: '/channels/:id',
-				element: <h1>Hello</h1>,
+				element: <Chat />,
 			},
 		],
 	},

@@ -5,6 +5,7 @@ import ServerIcon from './ServerIcon';
 import hotChili from '../assets/hot-chili.svg';
 import { uuidv4 } from '@firebase/util';
 import { AiOutlinePlus, AiOutlineDown } from 'react-icons/ai';
+import { BiCog, BiMicrophone, BiPhone } from 'react-icons/bi';
 import Channel from './Channel';
 import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../firebase';
@@ -103,14 +104,31 @@ function Home() {
 							))}
 						</div>
 					</div>
-					<div>
-						<div>
+					<div className='flex justify-between items-center p-1 space-x-8 bg-black/25'>
+						<div className='flex items-center space-x-1 '>
 							<img
 								src={user?.photoURL}
 								alt=''
 								className='h-10 rounded-full cursor-pointer'
 								onClick={signOut}
 							/>
+							<h4 className='text-white text-xs font-medium'>
+								{user?.displayName}
+								<span className='block text-gray-400'>
+									#{user.accessToken.substring(0, 4)}
+								</span>
+							</h4>
+						</div>
+						<div className='text-gray-400  flex items-center '>
+							<div className='hover:bg-[#3a3c43] cursor-pointer rounded-md p-2'>
+								<BiMicrophone size={20} />
+							</div>
+							<div className='hover:bg-[#3a3c43] cursor-pointer rounded-md p-2'>
+								<BiPhone size={20} />
+							</div>
+							<div className='hover:bg-[#3a3c43] cursor-pointer rounded-md p-2'>
+								<BiCog size={20} />
+							</div>
 						</div>
 					</div>
 				</div>
