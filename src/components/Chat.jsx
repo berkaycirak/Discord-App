@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
 	useChannelId,
 	useChannelName,
@@ -12,21 +12,79 @@ import {
 import { AiFillPlusCircle } from 'react-icons/ai';
 import { FiUsers } from 'react-icons/fi';
 import { CgInbox } from 'react-icons/cg';
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import {
+	collection,
+	doc,
+	onSnapshot,
+	serverTimestamp,
+	setDoc,
+	query,
+	orderBy,
+} from 'firebase/firestore';
 import { db } from '../firebase';
+import { useUserInfo } from '../storage/user/userSlice';
+import Message from './Message';
 
 function Chat() {
 	const channelId = useChannelId();
 	const channelName = useChannelName();
 	const inputRef = useRef('');
-	const sendMessage = async (e) => {
-		e.preventDefault();
-		const docRef = doc(collection(db, 'channels', channelName));
-		await setDoc(docRef, {
-			hello: 'Hello',
+	const chatRef = useRef(null);
+	// Listen that messages via onSnapshot event listener provided by firebase
+	const [messages, setMessages] = useState([]);
+	const user = useUserInfo();
+	const scrollToBottom = () => {
+		chatRef.current.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start',
 		});
 	};
-	console.log(inputRef);
+	// By creating a subcollection inside the channelName doc, we can store messages by creating messages collection with document.
+
+	const sendMessage = async (e) => {
+		e.preventDefault();
+		if (inputRef.current.value !== '') {
+			const messageRef = doc(
+				collection(db, 'channels', channelName, 'messages')
+			);
+
+			await setDoc(messageRef, {
+				timestamp: serverTimestamp(),
+				message: inputRef.current.value,
+				name: user?.displayName,
+				photoURL: user?.photoURL,
+				email: user?.email,
+				id: messageRef.id,
+			});
+		}
+		inputRef.current.value = '';
+		scrollToBottom();
+	};
+
+	// We use onSnapshot event listener provided by firebase in order to detect new messages into messages collection. Also, we can order query based on timesamp.
+	useEffect(() => {
+		const q = query(
+			collection(db, 'channels', channelName, 'messages'),
+			orderBy('timestamp', 'asc')
+		);
+		const unsub = onSnapshot(q, (snapshot) => {
+			let newMessages = [];
+			snapshot.docs.forEach((doc) => {
+				const { message, name, photoURL, id } = doc.data();
+				newMessages.push({
+					message,
+					name,
+					photoURL,
+					id,
+				});
+			});
+			setMessages(newMessages);
+		});
+		return () => {
+			unsub();
+		};
+	}, []);
+
 	return (
 		<div className='flex flex-col flex-grow h-screen '>
 			<header className='flex items-center justify-between space-x-5 border-b border-gray-800 p-4 -mt-1'>
@@ -50,7 +108,18 @@ function Chat() {
 					<BsQuestionCircleFill className='icon' />
 				</div>
 			</header>
-			<main className='flex-grow overflow-y-scroll scrollbar-hide'></main>
+			<main className='flex-grow overflow-y-scroll scrollbar-hide'>
+				{messages.map((message) => (
+					<Message
+						key={message?.key}
+						username={message?.name}
+						userPhoto={message?.photoURL}
+						message={message?.message}
+					/>
+				))}
+				{/* messages */}
+				<div ref={chatRef} />
+			</main>
 			<div className='bg-[#40444b] flex items-center p-2 mx-5 mb-7 rounded-md'>
 				<AiFillPlusCircle className='icon mr-4 ' size={20} />
 				<form className='flex-grow'>
