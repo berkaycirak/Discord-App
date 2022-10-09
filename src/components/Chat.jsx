@@ -91,7 +91,11 @@ function Chat() {
 
 	// Delete messages that belong to connected user. Pass that function into Message component.
 	const handleDelete = async (id) => {
-		await deleteDoc(doc(db, 'channels', channelName, 'messages', id));
+		if (alert('Would you like to delete your message?')) {
+			await deleteDoc(
+				doc(db, 'channels', channelName, 'messages', id)
+			);
+		}
 	};
 
 	return (
