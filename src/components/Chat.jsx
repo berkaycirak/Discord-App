@@ -20,6 +20,7 @@ import {
 	setDoc,
 	query,
 	orderBy,
+	deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useUserInfo } from '../storage/user/userSlice';
@@ -70,12 +71,15 @@ function Chat() {
 		const unsub = onSnapshot(q, (snapshot) => {
 			let newMessages = [];
 			snapshot.docs.forEach((doc) => {
-				const { message, name, photoURL, id } = doc.data();
+				const { message, name, photoURL, id, timestamp, email } =
+					doc.data();
 				newMessages.push({
 					message,
 					name,
 					photoURL,
 					id,
+					timestamp,
+					email,
 				});
 			});
 			setMessages(newMessages);
@@ -83,7 +87,12 @@ function Chat() {
 		return () => {
 			unsub();
 		};
-	}, []);
+	}, [channelName]);
+
+	// Delete messages that belong to connected user. Pass that function into Message component.
+	const handleDelete = async (id) => {
+		await deleteDoc(doc(db, 'channels', channelName, 'messages', id));
+	};
 
 	return (
 		<div className='flex flex-col flex-grow h-screen '>
@@ -111,13 +120,17 @@ function Chat() {
 			<main className='flex-grow overflow-y-scroll scrollbar-hide'>
 				{messages.map((message) => (
 					<Message
-						key={message?.key}
+						key={message?.id}
 						username={message?.name}
 						userPhoto={message?.photoURL}
 						message={message?.message}
+						timestamp={message?.timestamp}
+						email={message?.email}
+						id={message?.id}
+						onDelete={handleDelete}
 					/>
 				))}
-				{/* messages */}
+
 				<div ref={chatRef} />
 			</main>
 			<div className='bg-[#40444b] flex items-center p-2 mx-5 mb-7 rounded-md'>
