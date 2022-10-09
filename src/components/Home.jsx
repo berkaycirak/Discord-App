@@ -1,7 +1,9 @@
 import { Navigate } from 'react-router-dom';
 import { setUser, useUserInfo } from '../storage/user/userSlice';
 import discordLogo from '../assets/discord-logo.svg';
+
 import ServerIcon from './ServerIcon';
+
 import { uuidv4 } from '@firebase/util';
 import hotChili from '../assets/hot-chili.svg';
 import { AiOutlinePlus, AiOutlineDown } from 'react-icons/ai';
